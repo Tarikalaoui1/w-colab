@@ -17,17 +17,34 @@ jobs:
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           net user Administrator User#123456 /add
           net localgroup Administrators Administrator /add
-      - name: Start Ngrok Tunnel
+      - name: Start Ngrok and Print Connection Details
         run: |
-          Start-Process powershell -ArgumentList '-NoExit', '-Command', 'ngrok tcp 3389'
-      - name: Print Connection Details
-        run: |
-          Start-Sleep -Seconds 5
-          $tunnel = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels"
-          Write-Host "=========================================="
-          Write-Host "RDP Address: $($tunnel.tunnels[0].public_url)"
-          Write-Host "Username: Administrator"
-          Write-Host "Password: User#123456"
-          Write-Host "=========================================="
+          Start-Process -FilePath "ngrok" -ArgumentList "tcp 3389" -NoNewWindow
+          
+          $timeout = 30
+          $public_url = $null
+          while ($timeout -gt 0) {
+            try {
+              $response = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels" -ErrorAction Stop
+              if ($response.tunnels.count -gt 0) {
+                $public_url = $response.tunnels[0].public_url
+                break
+              }
+            } catch {
+              Start-Sleep -Seconds 3
+              $timeout -= 3
+            }
+          }
+
+          if ($public_url) {
+            Write-Host "=========================================="
+            Write-Host "RDP Address: $public_url"
+            Write-Host "Username: Administrator"
+            Write-Host "Password: User#123456"
+            Write-Host "=========================================="
+          } else {
+            Write-Error "Failed to retrieve Ngrok tunnel URL."
+            exit 1
+          }
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
