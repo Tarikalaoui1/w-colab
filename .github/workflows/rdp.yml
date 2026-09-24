@@ -18,16 +18,27 @@ jobs:
           net user Administrator User#123456 /add
           net localgroup Administrators Administrator /add
       - name: Start Ngrok Tunnel
-        run: Start-Process -FilePath "ngrok" -ArgumentList "tcp 3389"
+        run: |
+          Start-Process powershell -ArgumentList '-NoExit', '-Command', 'ngrok tcp 3389'
       - name: Print Connection Details
         run: |
-          Start-Sleep -Seconds 5
-          $tunnel = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels"
-          $public_url = $tunnel.tunnels[0].public_url
-          Write-Output "=========================================="
-          Write-Output "RDP Address: $public_url"
-          Write-Output "Username: Administrator"
-          Write-Output "Password: User#123456"
-          Write-Output "=========================================="
+          $timeout = 20
+          while ($timeout -gt 0) {
+            try {
+              $tunnel = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels" -ErrorAction Stop
+              if ($tunnel.tunnels.count -gt 0) {
+                $public_url = $tunnel.tunnels[0].public_url
+                Write-Output "=========================================="
+                Write-Output "RDP Address: $public_url"
+                Write-Output "Username: Administrator"
+                Write-Output "Password: User#123456"
+                Write-Output "=========================================="
+                break
+              }
+            } catch {
+              Start-Sleep -Seconds 2
+              $timeout -= 2
+            }
+          }
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
