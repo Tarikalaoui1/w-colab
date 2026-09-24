@@ -15,12 +15,7 @@ jobs:
           net localgroup Administrators Administrator /add
       - name: Start Pinggy Tunnel (TCP)
         run: |
-          Start-Process powershell -ArgumentList '-NoExit', '-Command', 'ssh -p 443 -R0:localhost:3389 a.pinggy.io'
-      - name: Print Connection Details
-        run: |
-          Write-Host "=========================================="
-          Write-Host "Utilisez l'adresse SSH de Pinggy qui va s'afficher ou connectez-vous via le tunnel TCP"
-          Write-Host "Username: Administrator"
-          Write-Host "Password: User#123456"
-          Write-Host "=========================================="
-          Start-Sleep -Seconds 21600
+          # Démarrage du tunnel et affichage direct
+          ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:3389 a.pinggy.io
+      - name: Keep Alive
+        run: Start-Sleep -Seconds 21600
