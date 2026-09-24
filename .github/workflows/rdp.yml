@@ -15,8 +15,7 @@ jobs:
           net localgroup Administrators Administrator /add
       - name: Start Pinggy TCP Tunnel
         run: |
-          # Téléchargement et installation d'un client SSH portable ou utilisation directe de ssh
-          # On lance le tunnel TCP vers le port 3389
-          ssh -o StrictHostKeyChecking=no -p 443 -R 0:localhost:3389 tcp.pinggy.io
+          # Utilisation de l'adresse correcte a.pinggy.io avec option de redirection TCP
+          ssh -o StrictHostKeyChecking=no -p 443 -R 0:localhost:3389 a.pinggy.io
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
