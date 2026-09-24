@@ -22,23 +22,12 @@ jobs:
           Start-Process powershell -ArgumentList '-NoExit', '-Command', 'ngrok tcp 3389'
       - name: Print Connection Details
         run: |
-          $timeout = 20
-          while ($timeout -gt 0) {
-            try {
-              $tunnel = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels" -ErrorAction Stop
-              if ($tunnel.tunnels.count -gt 0) {
-                $public_url = $tunnel.tunnels[0].public_url
-                Write-Output "=========================================="
-                Write-Output "RDP Address: $public_url"
-                Write-Output "Username: Administrator"
-                Write-Output "Password: User#123456"
-                Write-Output "=========================================="
-                break
-              }
-            } catch {
-              Start-Sleep -Seconds 2
-              $timeout -= 2
-            }
-          }
+          Start-Sleep -Seconds 5
+          $tunnel = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels"
+          Write-Host "=========================================="
+          Write-Host "RDP Address: $($tunnel.tunnels[0].public_url)"
+          Write-Host "Username: Administrator"
+          Write-Host "Password: User#123456"
+          Write-Host "=========================================="
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
