@@ -13,10 +13,9 @@ jobs:
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           net user Administrator User#123456 /add
           net localgroup Administrators Administrator /add
-      - name: Start Pinggy TCP Tunnel
+      - name: Start Serveo TCP Tunnel
         run: |
-          # Lancement du tunnel SSH en arrière-plan avec capture de l'URL ou affichage direct
-          Start-Process -FilePath "ssh" -ArgumentList "-o StrictHostKeyChecking=no -p 443 -R 0:localhost:3389 a.pinggy.io" -NoNewWindow
-          Start-Sleep -Seconds 10
+          # Serveo va ouvrir un port TCP distant et afficher l'adresse exacte (ex: serveo.net:XXXXX)
+          ssh -o StrictHostKeyChecking=no -R 0:localhost:3389 serveo.net
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
