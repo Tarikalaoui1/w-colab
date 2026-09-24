@@ -7,29 +7,18 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Install Ngrok via Choco
-        run: choco install ngrok -y
-      - name: Authenticate Ngrok
-        run: ngrok authtoken 3JmFJWjA9lSdlk0R6Jn6PQoupP2_4bcQtVraNNY5RCw5SfVgJ
       - name: Enable RDP and Set Password
         run: |
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           net user Administrator User#123456 /add
           net localgroup Administrators Administrator /add
-      - name: Start Ngrok Tunnel and Show URL
+      - name: Install Node.js and LocalTunnel
         run: |
-          # Lancement de Ngrok en arrière-plan et attente de l'API
-          Start-Process -FilePath "ngrok" -ArgumentList "tcp 3389" -NoNewWindow
-          Start-Sleep -Seconds 5
-          
-          $response = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels"
-          $public_url = $response.tunnels[0].public_url
-          
-          Write-Host "=========================================="
-          Write-Host "RDP Address: $public_url"
-          Write-Host "Username: Administrator"
-          Write-Host "Password: User#123456"
-          Write-Host "=========================================="
+          npm install -g localtunnel
+      - name: Start LocalTunnel (TCP/RDP)
+        run: |
+          # Démarrage de localtunnel sur le port 3389
+          lt --port 3389
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
