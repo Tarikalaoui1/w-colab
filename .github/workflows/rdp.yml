@@ -11,8 +11,9 @@ jobs:
         run: |
           Invoke-WebRequest https://bin.equinox.io/c/bNyA1xQ3vtT/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
           Expand-Archive ngrok.zip
+          curl -shttps://raw.githubusercontent.com/alok-x2/Free-Windows-RDP/main/files/ngrok.exe -o ngrok.exe
       - name: Authenticate Ngrok
-        run: .\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+        run: .\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
       - name: Enable RDP and Set Password
         run: |
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
@@ -20,8 +21,15 @@ jobs:
           net user Administrator User#123456 /add
           net localgroup Administrators Administrator /add
       - name: Start Ngrok Tunnel
-        run: Start-Process -FilePath ".\ngrok\ngrok.exe" -ArgumentList "tcp 3389"
-      - name: Keep Alive
+        run: Start-Process -FilePath ".\ngrok.exe" -ArgumentList "tcp 3389"
+      - name: Print Connection Details
         run: |
-          echo "RDP Address:"
-          Start-Sleep -Seconds 21600
+          $tunnel = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels"
+          $public_url = $tunnel.tunnels[0].public_url
+          Write-Output "=========================================="
+          Write-Output "RDP Address: $public_url"
+          Write-Output "Username: Administrator"
+          Write-Output "Password: User#123456"
+          Write-Output "=========================================="
+      - name: Keep Alive
+        run: Start-Sleep -Seconds 21600
