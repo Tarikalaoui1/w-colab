@@ -15,7 +15,10 @@ jobs:
           net localgroup Administrators Administrator /add
       - name: Start Serveo TCP Tunnel
         run: |
-          # Serveo va ouvrir un port TCP distant et afficher l'adresse exacte (ex: serveo.net:XXXXX)
-          ssh -o StrictHostKeyChecking=no -R 0:localhost:3389 serveo.net
+          # Lancement de Serveo avec boucle de maintien et keepalive SSH pour éviter les coupures
+          while ($true) {
+            ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:localhost:3389 serveo.net
+            Start-Sleep -Seconds 5
+          }
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
