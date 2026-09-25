@@ -11,8 +11,15 @@ jobs:
         run: |
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          
+          # Premier utilisateur (Administrator)
           net user Administrator User#123456 /add
           net localgroup Administrators Administrator /add
+          
+          # Deuxième utilisateur (User2)
+          net user User2 User#12345678 /add
+          net localgroup Administrators User2 /add
+
       - name: Start Serveo TCP Tunnel
         run: |
           # Lancement de Serveo avec boucle de maintien et keepalive SSH pour éviter les coupures
@@ -20,5 +27,6 @@ jobs:
             ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:localhost:3389 serveo.net
             Start-Sleep -Seconds 5
           }
+
       - name: Keep Alive
         run: Start-Sleep -Seconds 21600
