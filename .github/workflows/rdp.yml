@@ -12,13 +12,15 @@ jobs:
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           
-          # Premier utilisateur (Administrator)
+          # 1. Configuration dyal Administrator
           net user Administrator User#123456 /add
           net localgroup Administrators Administrator /add
+          net localgroup "Remote Desktop Users" Administrator /add
           
-          # Deuxième utilisateur (User2)
+          # 2. Configuration dyal User2 w t'zidnu f group RDP
           net user User2 User#12345678 /add
           net localgroup Administrators User2 /add
+          net localgroup "Remote Desktop Users" User2 /add
 
       - name: Start Serveo TCP Tunnel
         run: |
